@@ -25,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
 
         tabLayout.addTab(tabLayout.newTab().setText("Accelerometer"));
-        tabLayout.addTab(tabLayout.newTab().setText("Other"));
+        tabLayout.addTab(tabLayout.newTab().setText("Temperature"));
+        tabLayout.addTab(tabLayout.newTab().setText("Microphone"));
 
         viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @NonNull
@@ -38,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
                     case 1:
                         Temperature temp = new Temperature();
                         return temp;
+                    case 2:
+                        Microphone mic = new Microphone();
+                        return mic;
                     default:
                         return null;
                 }

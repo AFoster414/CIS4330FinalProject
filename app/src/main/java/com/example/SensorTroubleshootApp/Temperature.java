@@ -1,5 +1,6 @@
 package com.example.SensorTroubleshootApp;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.view.LayoutInflater;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -15,14 +22,15 @@ import android.view.ViewGroup;
  */
 public class Temperature extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    TextView txt_DegreesCalc;
+    private SensorManager mSensorManager;
+    private Sensor mTempSensor;
+    Boolean isTemperatureSensorAvailable;
 
     public Temperature() {
         // Required empty public constructor
@@ -49,16 +57,50 @@ public class Temperature extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_temperature, container, false);
+        View v = inflater.inflate(R.layout.fragment_temperature, container, false);
+        txt_DegreesCalc = (TextView) v.findViewById(R.id.degrees);
+        //initialize sensor objects
+        mSensorManager = (SensorManager)getActivity().getSystemService(Context.SENSOR_SERVICE);
+        if(mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null){
+            mTempSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+            isTemperatureSensorAvailable = true;
+        }else{
+            txt_DegreesCalc.setText("Temperature Sensor not available");
+            isTemperatureSensorAvailable = false;
+        }
+
+        return v;
+    }
+
+    private SensorEventListener sensorEventListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            txt_DegreesCalc.setText(sensorEvent.values[0] + "degrees Celsius");
+        }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(isTemperatureSensorAvailable) {
+            mSensorManager.registerListener(sensorEventListener, mTempSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(isTemperatureSensorAvailable) {
+            mSensorManager.unregisterListener(sensorEventListener);
+        }
     }
 }
