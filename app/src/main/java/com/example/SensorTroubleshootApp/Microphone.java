@@ -1,57 +1,54 @@
 package com.example.SensorTroubleshootApp;
-
+import android.Manifest;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Microphone#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.io.File;
+
 public class Microphone extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private AudioRecord ar = null;
+    private int minSize;
+    private static int MIC_PERM_CODE = 200;
+    MediaRecorder mediaRecorder;
+    MediaPlayer mediaPlayer;
 
     public Microphone() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Microphone.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Microphone newInstance(String param1, String param2) {
+    public static Microphone newInstance() {
         Microphone fragment = new Microphone();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
+        if (isMicPresent()) {
+            getMicPermission();
         }
     }
 
@@ -59,6 +56,70 @@ public class Microphone extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_microphone, container, false);
+        View v = inflater.inflate(R.layout.fragment_microphone, container, false);
+        super.onViewCreated(v, savedInstanceState);
+
+        return v;
+    }
+
+    public void btnRecordPressed(View v) {
+        try {
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setOutputFile(getRecordingFilePath());
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+
+            Toast.makeText(getActivity(), "Recording is Started", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void btnStopPressed(View v) {
+        mediaRecorder.stop();
+        mediaRecorder.release();
+        mediaRecorder = null;
+
+        Toast.makeText(getActivity(), "Recording has Stopped", Toast.LENGTH_SHORT).show();
+    }
+
+    public void btnPlayPressed(View v) {
+        try{
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(getRecordingFilePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            Toast.makeText(getActivity(), "Recording is Playing", Toast.LENGTH_SHORT).show();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private boolean isMicPresent() {
+        if (this.getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void getMicPermission() {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, MIC_PERM_CODE);
+        }
+    }
+
+    private String getRecordingFilePath() {
+        ContextWrapper contextWrapper = new ContextWrapper(getActivity().getApplicationContext());
+        File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        File file = new File(musicDirectory, "testRecordingFile" + ".mp3");
+        return file.getPath();
     }
 }

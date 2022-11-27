@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Accelerometer"));
         tabLayout.addTab(tabLayout.newTab().setText("Temperature"));
         tabLayout.addTab(tabLayout.newTab().setText("Microphone"));
+        tabLayout.addTab(tabLayout.newTab().setText("Proximity"));
 
         viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @NonNull
@@ -42,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         Microphone mic = new Microphone();
                         return mic;
+                    case 3:
+                        Proximity prox = new Proximity();
+                        return prox;
                     default:
                         return null;
                 }
