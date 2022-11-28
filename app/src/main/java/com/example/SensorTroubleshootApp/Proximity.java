@@ -66,7 +66,7 @@ public class Proximity extends Fragment {
             }
         };
         sensorManager.registerListener(proximitySensorListener, proximitySensor, 2 * 1000 * 1000);
-        
+
 
         return v;
     }
@@ -74,5 +74,6 @@ public class Proximity extends Fragment {
     public void onPause() {
         super.onPause();
         sensorManager.unregisterListener(proximitySensorListener);
+        getActivity().getWindow().getDecorView().setBackgroundColor(Color.WHITE);
     }
 }

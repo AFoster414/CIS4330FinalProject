@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,11 +29,10 @@ import java.io.File;
 
 public class Microphone extends Fragment {
 
-    private AudioRecord ar = null;
-    private int minSize;
-    private static int MIC_PERM_CODE = 200;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
+    private Button StartRecording, StopRecording, StartPlaying, StopPlaying;
+    private String AudioSavePath = null;
 
     public Microphone() {
         // Required empty public constructor
@@ -46,10 +46,6 @@ public class Microphone extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (isMicPresent()) {
-            getMicPermission();
-        }
     }
 
     @Override
@@ -59,62 +55,84 @@ public class Microphone extends Fragment {
         View v = inflater.inflate(R.layout.fragment_microphone, container, false);
         super.onViewCreated(v, savedInstanceState);
 
+        StartRecording = (Button) v.findViewById(R.id.recordButton);
+        StopRecording = (Button) v.findViewById(R.id.stopRecordButton);
+        StartPlaying = (Button) v.findViewById(R.id.playButton);
+        StopPlaying = (Button) v.findViewById(R.id.stopPlayButton);
+
+        StartRecording.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                if(checkPermissions() == true){
+                    AudioSavePath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+"testrecording.mp3";
+                    mediaRecorder = new MediaRecorder();
+                    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                    mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                    mediaRecorder.setOutputFile(AudioSavePath);
+
+                    try{
+                        mediaRecorder.prepare();
+                        mediaRecorder.start();
+                        Toast.makeText(getActivity(), "Recording Started", Toast.LENGTH_SHORT).show();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+
+                }else{
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                }
+            }
+        });
+
+        StopRecording.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                mediaRecorder.stop();
+                mediaRecorder.release();
+                Toast.makeText(getActivity(), "Recording Stopped", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        StartPlaying.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                mediaPlayer = new MediaPlayer();
+                try{
+                    mediaPlayer.setDataSource(AudioSavePath);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    Toast.makeText(getActivity(), "Started Playing", Toast.LENGTH_SHORT).show();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        StopPlaying.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                if(mediaPlayer != null){
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    Toast.makeText(getActivity(), "Playing Stopped", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         return v;
     }
 
-    public void btnRecordPressed(View v) {
-        try {
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mediaRecorder.setOutputFile(getRecordingFilePath());
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mediaRecorder.prepare();
-            mediaRecorder.start();
 
-            Toast.makeText(getActivity(), "Recording is Started", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private boolean checkPermissions(){
+        int first = ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        int second = ActivityCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
+        return first == PackageManager.PERMISSION_GRANTED && second == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void btnStopPressed(View v) {
-        mediaRecorder.stop();
-        mediaRecorder.release();
-        mediaRecorder = null;
 
-        Toast.makeText(getActivity(), "Recording has Stopped", Toast.LENGTH_SHORT).show();
-    }
-
-    public void btnPlayPressed(View v) {
-        try{
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(getRecordingFilePath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            Toast.makeText(getActivity(), "Recording is Playing", Toast.LENGTH_SHORT).show();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    private boolean isMicPresent() {
-        if (this.getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void getMicPermission() {
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO)
-                == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, MIC_PERM_CODE);
-        }
-    }
 
     private String getRecordingFilePath() {
         ContextWrapper contextWrapper = new ContextWrapper(getActivity().getApplicationContext());
