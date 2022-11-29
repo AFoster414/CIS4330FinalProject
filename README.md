@@ -10,14 +10,19 @@ Scenario: Targets people who experience issues using mobile apps that depend on 
 
 Ground Truths Used:
 
-Accelerometer: Reading is below 9.81 m/s (should always be at least 9.81 bc of gravity) = Not Working Correctly.
+Accelerometer: 
+-Reading is below 9.81 m/s (should always be at least 9.81 bc of gravity) = Not Working Correctly.
 Sensor = null? => Sensor is not working at all or device does not have one
-Reading is at least 9.81 m/s? = Working Correctly
-Reading is constantly reading > 130 m/s? = Not Working Correcty (In testing, the highest we could achieve was ~129 m/s from shaking the device).
+-Reading is at least 9.81 m/s? = Working Correctly
+-Reading is constantly reading > 130 m/s? = Not Working Correcty (In testing, the highest we could achieve was ~129 m/s from shaking the device).
 
-Temperature: Sensor = null? => Sensor is not working at all or device does not have one
+Temperature: 
+-Sensor = null? => Sensor is not working at all or device does not have one
 
-Proximity: Sensor = null? => Sensor is not working at all or device does not have one
-Reading is consistently detecting something close in proximity => Not Working Correctly (In practice, the user will not always have the sensor triggering when using the app)
+Proximity: Sensor = null? => 
+-Sensor is not working at all or device does not have one
+-Reading is consistently detecting something close in proximity => Not Working Correctly (In practice, the user will not always have the sensor triggering when using the app)
+-Sensor has not been triggered yet? => May not be working, try triggering it!
 
-Microphone: Sensor = null? => Sensor is not working at all or device does not have one
+Microphone: 
+-Sensor = null? => Sensor is not working at all or device does not have one
