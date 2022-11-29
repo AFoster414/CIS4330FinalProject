@@ -23,10 +23,7 @@ import android.widget.TextView;
  */
 public class Accelerometer extends Fragment {
 
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    TextView txt_currentAccel, txt_prevAccel, txt_acceleration;
+    TextView txt_currentAccel, txt_prevAccel, txt_acceleration, txt_maxAccel, accelStatus;
     ProgressBar prog_shakeMeter;
 
     private SensorManager mSensorManager;
@@ -34,6 +31,8 @@ public class Accelerometer extends Fragment {
 
     private double accelerationCurrentValue;
     private double accelerationPreviousValue;
+    private double currentMax;
+    private int i, sum;
 
     public Accelerometer() {
         // Required empty public constructor
@@ -42,10 +41,6 @@ public class Accelerometer extends Fragment {
     // TODO: Rename and change types and number of parameters
     public static Accelerometer newInstance(String param1, String param2) {
         Accelerometer fragment = new Accelerometer();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -58,6 +53,8 @@ public class Accelerometer extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        currentMax = 0.00;
+        i = 0;
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_accelerometer, container, false);
         super.onViewCreated(v, savedInstanceState);
@@ -65,6 +62,8 @@ public class Accelerometer extends Fragment {
         txt_acceleration = (TextView) v.findViewById(R.id.txt_accel);
         txt_currentAccel = (TextView) v.findViewById(R.id.txt_currentAccel);
         txt_prevAccel = (TextView) v.findViewById(R.id.txt_prevAccel);
+        txt_maxAccel = (TextView) v.findViewById(R.id.maxAccel);
+        accelStatus = (TextView) v.findViewById(R.id.accel_status);
 
         //initialize sensor objects
         mSensorManager = (SensorManager)getActivity().getSystemService(Context.SENSOR_SERVICE);
@@ -76,21 +75,49 @@ public class Accelerometer extends Fragment {
         @SuppressLint("SetTextI18n")
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
+
+            //SENSOR DATA EXTRACTION
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
 
             accelerationCurrentValue = Math.sqrt(x * x + y * y + z * z);
+
+            //FILTERING / FEATURE EXTRACTION
             double changeInAcceleration = Math.abs(accelerationCurrentValue - accelerationPreviousValue);
             accelerationPreviousValue = accelerationCurrentValue;
 
-            //update text values
-            txt_currentAccel.setText("Current Acceleration = "+ (int) accelerationCurrentValue);
-            txt_prevAccel.setText("Previous Acceleration = " + (int) accelerationPreviousValue);
-            txt_acceleration.setText("Acceleration Change = " + (int) changeInAcceleration);
+            accelerationCurrentValue = Math.ceil(accelerationCurrentValue * 10000) / 10000;
+            accelerationPreviousValue = Math.ceil(accelerationPreviousValue * 10000) / 10000;
+            changeInAcceleration = Math.ceil(changeInAcceleration * 10000) / 10000;
 
+            //update text values / labelling data
+            txt_currentAccel.setText("Current Acceleration = "+ accelerationCurrentValue);
+            txt_prevAccel.setText("Previous Acceleration = " + accelerationPreviousValue);
+            txt_acceleration.setText("Acceleration Change = " + changeInAcceleration);
+
+            if(accelerationCurrentValue > currentMax){
+                currentMax = accelerationCurrentValue;
+                txt_maxAccel.setText("Max: " + (double) currentMax);
+            }
+
+            //CLASSIFICATION
+            i++;
+            //GROUND TRUTH: -bc of gravity, accelerometer data should always be (at least) around 9.81 m/s
+            //              -if the sensor is not working, it will produce a value of nul, 0, or 130+ (during testing, the max value we could obtain was under 130 m/s)
+            if(accelerationCurrentValue < (sum/i)){ //if gathered sensor data is less than the ground truth / below average
+                accelStatus.setText("Sensor may not be working correctly.");
+                accelStatus.setTextColor(Color.parseColor("#edc540"));
+            }else if(accelerationCurrentValue == 0 || accelerationCurrentValue >= 130){
+                accelStatus.setText("Sensor is not working!");
+                accelStatus.setTextColor(Color.RED);
+            }else{//if gathered data is following the average and ground truth
+                accelStatus.setText("Sensor is working correctly!");
+                accelStatus.setTextColor(Color.GREEN);
+            }
+
+            //updating shake meter
             prog_shakeMeter.setProgress((int)changeInAcceleration);
-
             if(changeInAcceleration > 14){
                 prog_shakeMeter.setBackgroundColor(Color.RED);
             }else if(changeInAcceleration > 5){
@@ -98,7 +125,7 @@ public class Accelerometer extends Fragment {
             }else if(changeInAcceleration > 2){
                 prog_shakeMeter.setBackgroundColor(Color.YELLOW);
             }else{
-                prog_shakeMeter.setBackgroundColor(getResources().getColor(com.google.android.material.R.color.design_default_color_background));
+                prog_shakeMeter.setBackgroundColor(getResources().getColor(R.color.white));
             }
 
         }

@@ -11,6 +11,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -19,6 +20,7 @@ public class Proximity extends Fragment {
     private SensorManager sensorManager;
     private Sensor proximitySensor;
     private SensorEventListener proximitySensorListener;
+    TextView statusBlock, statusInfo, proxTitle;
 
 
     public Proximity() {
@@ -45,6 +47,9 @@ public class Proximity extends Fragment {
 
         sensorManager = (SensorManager)getActivity().getSystemService(Context.SENSOR_SERVICE);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        statusBlock = (TextView) v.findViewById(R.id.status_block);
+        statusInfo = (TextView) v.findViewById(R.id.status_info);
+        proxTitle = (TextView) v.findViewById(R.id.prox_title);
 
         if(proximitySensor == null){
             Toast.makeText(getActivity(), "Proximity Sensor not available!", Toast.LENGTH_SHORT).show();
@@ -54,9 +59,17 @@ public class Proximity extends Fragment {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
                 if(sensorEvent.values[0] < proximitySensor.getMaximumRange()){
-                    getActivity().getWindow().getDecorView().setBackgroundColor(Color.RED);
+                    statusBlock.setText("aaaaaaaaaaaaaaaaaaaa");//filling up the block so we can get a bar of color
+                    statusBlock.setTextColor(Color.RED);
+                    statusBlock.setBackgroundColor(Color.RED);
+                    statusInfo.setText("Near!");
+                    statusInfo.setTextColor(Color.RED);
                 }else{
-                    getActivity().getWindow().getDecorView().setBackgroundColor(Color.GREEN);
+                    statusBlock.setText("aaaaaaaaaaaaaaaaaaaa");//filling up the block so we can get a bar of color
+                    statusBlock.setTextColor(Color.GREEN);
+                    statusBlock.setBackgroundColor(Color.GREEN);
+                    statusInfo.setText("Away!");
+                    statusInfo.setTextColor(Color.GREEN);
                 }
             }
 
@@ -74,6 +87,5 @@ public class Proximity extends Fragment {
     public void onPause() {
         super.onPause();
         sensorManager.unregisterListener(proximitySensorListener);
-        getActivity().getWindow().getDecorView().setBackgroundColor(Color.WHITE);
     }
 }
