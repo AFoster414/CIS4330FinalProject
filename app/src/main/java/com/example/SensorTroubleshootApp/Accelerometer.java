@@ -29,17 +29,14 @@ public class Accelerometer extends Fragment {
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
-    private double accelerationCurrentValue;
-    private double accelerationPreviousValue;
-    private double currentMax;
-    private int i, sum;
+    private double accelerationCurrentValue, accelerationPreviousValue,currentMax;
+
 
     public Accelerometer() {
         // Required empty public constructor
     }
 
-    // TODO: Rename and change types and number of parameters
-    public static Accelerometer newInstance(String param1, String param2) {
+    public static Accelerometer newInstance() {
         Accelerometer fragment = new Accelerometer();
         return fragment;
     }
@@ -54,7 +51,6 @@ public class Accelerometer extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         currentMax = 0.00;
-        i = 0;
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_accelerometer, container, false);
         super.onViewCreated(v, savedInstanceState);
@@ -81,9 +77,9 @@ public class Accelerometer extends Fragment {
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
 
-            accelerationCurrentValue = Math.sqrt(x * x + y * y + z * z);
-
             //FILTERING / FEATURE EXTRACTION
+            //since we want the whole sensor reading, not much filtering is done (or any at all)
+            accelerationCurrentValue = Math.sqrt(x * x + y * y + z * z);
             double changeInAcceleration = Math.abs(accelerationCurrentValue - accelerationPreviousValue);
             accelerationPreviousValue = accelerationCurrentValue;
 
@@ -102,15 +98,18 @@ public class Accelerometer extends Fragment {
             }
 
             //CLASSIFICATION
-            i++;
+
             //GROUND TRUTH: -bc of gravity, accelerometer data should always be (at least) around 9.81 m/s
             //              -if the sensor is not working, it will produce a value of nul, 0, or 130+ (during testing, the max value we could obtain was under 130 m/s)
-            if(accelerationCurrentValue < (sum/i)){ //if gathered sensor data is less than the ground truth / below average
-                accelStatus.setText("Sensor may not be working correctly.");
-                accelStatus.setTextColor(Color.parseColor("#edc540"));
+            if(accelerationCurrentValue < 9.81 && accelerationCurrentValue > 7.35){ //if gathered sensor data is less than the ground truth / below average
+                accelStatus.setText("Sensor may not be working perfectly.");
+                accelStatus.setTextColor(Color.YELLOW);
             }else if(accelerationCurrentValue == 0 || accelerationCurrentValue >= 130){
                 accelStatus.setText("Sensor is not working!");
                 accelStatus.setTextColor(Color.RED);
+            }else if(accelerationCurrentValue < 7.35){//if the sensor readings are not within the top quartile
+                accelStatus.setText("Sensor may be damaged!");
+                accelStatus.setTextColor(Color.parseColor("#edc540"));
             }else{//if gathered data is following the average and ground truth
                 accelStatus.setText("Sensor is working correctly!");
                 accelStatus.setTextColor(Color.GREEN);

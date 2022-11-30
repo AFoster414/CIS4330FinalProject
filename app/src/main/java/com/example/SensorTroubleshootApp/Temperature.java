@@ -1,5 +1,6 @@
 package com.example.SensorTroubleshootApp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -50,6 +51,7 @@ public class Temperature extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -70,9 +72,15 @@ public class Temperature extends Fragment {
     }
 
     private SensorEventListener sensorEventListener = new SensorEventListener() {
+        @SuppressLint("SetTextI18n")
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            txt_DegreesCalc.setText(sensorEvent.values[0] + "degrees Celsius");
+            //DATA EXTRACTION
+            double temperature = sensorEvent.values[0];
+
+
+            //CLASSIFICATION
+            txt_DegreesCalc.setText(temperature + "degrees Celsius");
         }
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) {

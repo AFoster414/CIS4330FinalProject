@@ -65,8 +65,12 @@ public class Proximity extends Fragment {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
 
-                //Sensor Data Extraction
-                if(sensorEvent.values[0] < proximitySensor.getMaximumRange()){//labelling data & updating text values
+                //DATA EXTRACTION
+                double data = sensorEvent.values[0];
+
+
+                //FILTERING & FEATURE EXTRACTION
+                if(data < proximitySensor.getMaximumRange()){//labelling data & updating text values
                     statusBlock.setText("aaaaaaaaaaaaaaaaaaaa");//filling up the block so we can get a bar of color
                     statusBlock.setTextColor(Color.RED);
                     statusBlock.setBackgroundColor(Color.RED);
