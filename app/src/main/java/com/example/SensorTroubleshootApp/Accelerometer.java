@@ -16,11 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Accelerometer#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class Accelerometer extends Fragment {
 
     TextView txt_currentAccel, txt_prevAccel, txt_acceleration, txt_maxAccel, accelStatus;
@@ -100,14 +96,14 @@ public class Accelerometer extends Fragment {
             //CLASSIFICATION
 
             //GROUND TRUTH: -bc of gravity, accelerometer data should always be (at least) around 9.81 m/s
-            //              -if the sensor is not working, it will produce a value of nul, 0, or 130+ (during testing, the max value we could obtain was under 130 m/s)
-            if(accelerationCurrentValue < 9.81 && accelerationCurrentValue > 7.35){ //if gathered sensor data is less than the ground truth / below average
+            //              -if the sensor is not working, it will produce a value of nul, 0, or 130+ (during testing, the max value we could obtain was just under 130 m/s)
+            if(accelerationCurrentValue < 9.81 && accelerationCurrentValue > 7.35){ //if gathered sensor data is in the top quartile but below the assumed minimum
                 accelStatus.setText("Sensor may not be working perfectly.");
                 accelStatus.setTextColor(Color.YELLOW);
-            }else if(accelerationCurrentValue == 0 || accelerationCurrentValue >= 130){
+            }else if(accelerationCurrentValue == 0){//if sensor is not gathering data at all
                 accelStatus.setText("Sensor is not working!");
                 accelStatus.setTextColor(Color.RED);
-            }else if(accelerationCurrentValue < 7.35){//if the sensor readings are not within the top quartile
+            }else if(accelerationCurrentValue < 7.35 || accelerationCurrentValue >= 130){//if the sensor readings are not within the top quartile
                 accelStatus.setText("Sensor may be damaged!");
                 accelStatus.setTextColor(Color.parseColor("#edc540"));
             }else{//if gathered data is following the average and ground truth

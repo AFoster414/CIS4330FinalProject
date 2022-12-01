@@ -2,6 +2,7 @@ package com.example.SensorTroubleshootApp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -28,7 +29,7 @@ public class Temperature extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    TextView txt_DegreesCalc;
+    TextView txt_DegreesCalc, txt_tempStatus;
     private SensorManager mSensorManager;
     private Sensor mTempSensor;
     Boolean isTemperatureSensorAvailable;
@@ -58,6 +59,8 @@ public class Temperature extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_temperature, container, false);
         txt_DegreesCalc = (TextView) v.findViewById(R.id.degrees);
+        txt_tempStatus = (TextView) v.findViewById(R.id.tempStatus);
+
         //initialize sensor objects
         mSensorManager = (SensorManager)getActivity().getSystemService(Context.SENSOR_SERVICE);
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null){
@@ -78,9 +81,24 @@ public class Temperature extends Fragment {
             //DATA EXTRACTION
             double temperature = sensorEvent.values[0];
 
-
-            //CLASSIFICATION
+            //FEATURE EXTRACTION
             txt_DegreesCalc.setText(temperature + "degrees Celsius");
+
+            //DATA CLASSIFICATION (the initial plan was to compare this data to the
+            // gathered temp. data from the internet, but that became really difficult to implement)
+            if(temperature > 90){
+                txt_tempStatus.setText("It's really hot!");
+                txt_tempStatus.setTextColor(Color.RED);
+            }else if(temperature > 70){
+                txt_tempStatus.setText("It's getting warm!");
+                txt_tempStatus.setTextColor(Color.YELLOW);
+            }else if(temperature < 60 && temperature > 40){
+                txt_tempStatus.setText("It's getting chilly!");
+                txt_tempStatus.setTextColor(Color.BLUE);
+            }else if(temperature <= 40){
+                txt_tempStatus.setText("It's really cold!");
+                txt_tempStatus.setTextColor(Color.GRAY);
+            }
         }
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) {

@@ -10,11 +10,22 @@ import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
 
+//REFERENCES AND RESOURCES USED:
+//ACCELEROMETER TUTORIAL: https://youtu.be/zUzZ67grYt8
+//PROXIMITY SENSOR TUTORIAL: https://youtu.be/QE0Qsy55iuk
+//TEMPERATURE SENSOR TUTORIAL: https://youtu.be/JKuTnuUsKOI
+//LAYOUT & PAGER TUTORIAL: https://youtu.be/Q20jZQy6vwU
+
+//SOURCES USED APP'S POTENTIAL USES / INSPIRATION
+//https://www.reddit.com/r/Nexus6P/comments/3to0ds/broken_accelerometer_try_dropping_your_phone/
+//^ This helped establish that sensors can be damaged and/or broken. Who doesn't drop their phone?
+//https://www.makeuseof.com/android-phone-proximity-sensor-not-working
+//^ This also helped establish that sensors can be damaged and needs to be monitored
+
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.addTab(tabLayout.newTab().setText("Accelerometer"));
         tabLayout.addTab(tabLayout.newTab().setText("Temperature"));
-        tabLayout.addTab(tabLayout.newTab().setText("Microphone"));
         tabLayout.addTab(tabLayout.newTab().setText("Proximity"));
 
         viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
@@ -41,9 +51,6 @@ public class MainActivity extends AppCompatActivity {
                         Temperature temp = new Temperature();
                         return temp;
                     case 2:
-                        Microphone mic = new Microphone();
-                        return mic;
-                    case 3:
                         Proximity prox = new Proximity();
                         return prox;
                     default:
@@ -60,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                viewPager.setCurrentItem(tab.getPosition());//when a tab is selected, display the proper class
             }
 
             @Override

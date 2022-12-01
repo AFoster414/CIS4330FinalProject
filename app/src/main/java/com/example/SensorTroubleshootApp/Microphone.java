@@ -34,6 +34,9 @@ public class Microphone extends Fragment {
     private Button StartRecording, StopRecording, StartPlaying, StopPlaying;
     private String AudioSavePath = null;
 
+    //
+    //UNUSED, could not get the microphone portion to work so it was cut out from the app, but here is the code:
+    //
     public Microphone() {
         // Required empty public constructor
     }

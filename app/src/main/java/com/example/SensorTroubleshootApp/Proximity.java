@@ -50,6 +50,7 @@ public class Proximity extends Fragment {
         on = 0;
         off = 0;
 
+        //setting up the different objects and matching them w/ layout elements such as text boxes
         sensorManager = (SensorManager)getActivity().getSystemService(Context.SENSOR_SERVICE);
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         statusBlock = (TextView) v.findViewById(R.id.status_block);
@@ -57,6 +58,7 @@ public class Proximity extends Fragment {
         proxTitle = (TextView) v.findViewById(R.id.prox_title);
         txt_diagnosis = (TextView) v.findViewById(R.id.txt_diagnostic);
 
+        //if the sensor is not available, then display a toast to say so
         if(proximitySensor == null){
             Toast.makeText(getActivity(), "Proximity Sensor not available!", Toast.LENGTH_SHORT).show();
         }
@@ -76,24 +78,24 @@ public class Proximity extends Fragment {
                     statusBlock.setBackgroundColor(Color.RED);
                     statusInfo.setText("Near!");
                     statusInfo.setTextColor(Color.RED);
-                    on++;
+                    on++;//feature extraction, we want to know how long the sensor has been triggered
                 }else{//labelling data & updating text values
                     statusBlock.setText("aaaaaaaaaaaaaaaaaaaa");//filling up the block so we can get a bar of color
                     statusBlock.setTextColor(Color.GREEN);
                     statusBlock.setBackgroundColor(Color.GREEN);
                     statusInfo.setText("Away!");
                     statusInfo.setTextColor(Color.GREEN);
-                    off++;
+                    off++;//feature extraction, we want to know how long the sensor has not been triggered
                 }
 
                 //CLASSIFICATION
                 if(on == 0){//if the sensor has never been triggered yet
                     txt_diagnosis.setText("Sensor has not been triggered. Try doing so!");
                     txt_diagnosis.setTextColor(Color.YELLOW);
-                }else if(on > off){//if sensor is triggered more than off, unlikely occurence
+                }else if(on > off){//if sensor is triggered more than off, unlikely occurrence
                     txt_diagnosis.setText("Sensor keeps being triggered May not be working correctly.");
                     txt_diagnosis.setTextColor(Color.RED);
-                }else{//if the sensor is working normally
+                }else{//the sensor is working normally
                     txt_diagnosis.setText("Working normally!");
                     txt_diagnosis.setTextColor(Color.GREEN);
                 }
